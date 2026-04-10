@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🔐 Painel Administrativo</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+  <body class="admin-body">
+    <div class="admin-layout">
+      <div class="painel-container">
+        <!-- Ícone decorativo -->
+        <div class="painel-icone">📦</div>
+
+        <h2>Cadastrar Novo Produto</h2>
+
+        <!-- INFO DO USUÁRIO LOGADO + LOGOUT -->
+        <div class="usuario-logado" id="usuario-logado" style="display: none">
+          <div class="usuario-info">
+            <span class="usuario-avatar">👤</span>
+            <div>
+              <span class="usuario-label">Operador:</span>
+              <span class="usuario-email" id="nome-usuario">Carregando...</span>
+            </div>
+          </div>
+          <button onclick="sairDoSistema()" class="btn-sair">🚪 Sair</button>
+        </div>
+
+        <p class="subtitulo">
+          Preencha os dados abaixo para adicionar à vitrine
+        </p>
+
+        <div class="form-grupo">
+          <label>📝 Nome do Produto:</label>
+          <input
+            type="text"
+            id="input-nome"
+            placeholder="Ex: Tênis Nike Air Max"
+          />
+        </div>
+
+        <div class="form-grupo">
+          <label>💰 Preço (apenas números e ponto):</label>
+          <input
+            type="number"
+            id="input-preco"
+            step="0.01"
+            min="0"
+            placeholder="Ex: 199.90"
+          />
+        </div>
+
+        <div class="form-grupo">
+          <label>🖼️ Caminho da Imagem:</label>
+          <input
+            type="text"
+            id="input-imagem"
+            placeholder="Ex: img/tenis.png ou URL da imagem"
+          />
+        </div>
+
+        <div class="form-grupo">
+          <label>🏷️ Categoria:</label>
+          <select id="input-categoria">
+            <option value="" disabled selected>Selecione a raridade...</option>
+            <option value="Commum">🟢 Commum</option>
+            <option value="Raro">🔵 Raro</option>
+            <option value="Deus Brainrot">🧠 Deus Brainrot</option>
+            <option value="Secret">🔮 Secret</option>
+            <option value="Legendary">🏆 Legendary</option>
+          </select>
+        </div>
+
+        <button class="btn-salvar" id="btn-salvar" onclick="cadastrarProduto()">
+          💾 Salvar no Banco
+        </button>
+
+        <p id="mensagem-aviso"></p>
+
+        <!-- Lista de produtos cadastrados recentemente -->
+        <div class="lista-recentes" id="secao-recentes" style="display: none">
+          <h3>📋 Últimos cadastros</h3>
+          <div id="lista-itens-recentes"></div>
+        </div>
+
+        <!-- Links de navegação -->
+        <div class="admin-nav">
+          <a href="index.html" class="link-voltar">← Voltar para a Vitrine</a>
+        </div>
+      </div>
+
+      <!-- ============================================ -->
+      <!-- SEÇÃO: GERENCIAR PRODUTOS (EXCLUIR)         -->
+      <!-- ============================================ -->
+      <div class="painel-container gerenciar-container">
+        <div class="painel-icone">🗑️</div>
+        <h2>Gerenciar Produtos</h2>
+        <p class="subtitulo">
+          Clique no botão para remover um produto da vitrine
+        </p>
+
+        <div class="gerenciar-filtro">
+          <input
+            type="text"
+            id="busca-admin"
+            placeholder="🔍 Buscar produto pelo nome..."
+            oninput="filtrarProdutosAdmin()"
+          />
+        </div>
+
+        <div class="gerenciar-stats" id="gerenciar-stats"></div>
+
+        <div id="lista-todos-produtos" class="lista-todos-produtos">
+          <p class="carregando-msg">⏳ Carregando produtos...</p>
+        </div>
+      </div>
+    </div>
+    <!-- fecha .admin-layout -->
+
+    <script>
+      // ============================================
+      // 1. CONFIGURAÇÃO DO BANCO (Supabase)
+      // ============================================
+      const supabaseUrl = "https://saexzdhlesaomczxcxlk.supabase.co";
+      const supabaseKey =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhZXh6ZGhsZXNhb21jenhjeGxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NDIyMDIsImV4cCI6MjA5MDAxODIwMn0.XFls2ymzat9Nm2TSjry6qZzkQbIceLvEBMocA18cvcg";
+
+      let banco;
+      function inicializarBanco() {
+        if (banco) return banco;
+        if (
+          typeof window.supabase === "undefined" ||
+          !window.supabase.createClient
+        ) {
+          throw new Error(
+            "Biblioteca Supabase ainda não carregou. Recarregue a página."
+          );
+        }
+        banco = window.supabase.createClient(supabaseUrl, supabaseKey);
+        return banco;
+      }
+
+      // ============================================
+      // 2. VERIFICAR ACESSO (Proteção da página)
+      // ============================================
+      async function verificarAcesso() {
+        try {
+          inicializarBanco();
+          const {
+            data: { user },
+          } = await banco.auth.getUser();
+
+          if (!user) {
+            // NÃO LOGADO — expulsa para o login
+            alert("🚫 Área restrita! Faça login primeiro.");
+            window.location.href = "login.html";
+          } else {
+            // LOGADO — mostra quem é o operador
+            document.getElementById("nome-usuario").innerText = user.email;
+            document.getElementById("usuario-logado").style.display = "flex";
+          }
+        } catch (err) {
+          alert("❌ Erro ao verificar acesso. Faça login novamente.");
+          window.location.href = "login.html";
+        }
+      }
+
+      // ============================================
+      // 3. LOGOUT — Sair do Sistema
+      // ============================================
+      async function sairDoSistema() {
+        try {
+          inicializarBanco();
+          await banco.auth.signOut();
+          window.location.href = "index.html";
+        } catch (err) {
+          window.location.href = "index.html";
+        }
+      }
+
+      // ============================================
+      // 4. FUNÇÃO DE CADASTRO
+      // ============================================
+      async function cadastrarProduto() {
+        try {
+          inicializarBanco();
+        } catch (err) {
+          document.getElementById("mensagem-aviso").innerText =
+            "❌ " + err.message;
+          document.getElementById("mensagem-aviso").style.color = "#EF4444";
+          return;
+        }
+
+        let nomeProduto = document.getElementById("input-nome").value.trim();
+        let precoProduto = document.getElementById("input-preco").value;
+        let imagemProduto = document
+          .getElementById("input-imagem")
+          .value.trim();
+        let categoriaProduto = document
+          .getElementById("input-categoria")
+          .value.trim();
+        let aviso = document.getElementById("mensagem-aviso");
+        let btnSalvar = document.getElementById("btn-salvar");
+
+        if (nomeProduto === "" || precoProduto === "") {
+          aviso.innerText = "⚠️ Preencha o nome e o preço!";
+          aviso.style.color = "#EF4444";
+          shakeInput();
+          return;
+        }
+
+        if (Number(precoProduto) <= 0) {
+          aviso.innerText = "⚠️ O preço precisa ser maior que zero!";
+          aviso.style.color = "#EF4444";
+          return;
+        }
+
+        aviso.innerText = "☁️ Salvando na nuvem...";
+        aviso.style.color = "#3B82F6";
+        btnSalvar.disabled = true;
+        btnSalvar.textContent = "⏳ Salvando...";
+
+        let { error } = await banco.from("produtos").insert([
+          {
+            nome: nomeProduto,
+            preco: precoProduto,
+            imagem_url: imagemProduto || null,
+            Categoria: categoriaProduto || null,
+          },
+        ]);
+
+        btnSalvar.disabled = false;
+        btnSalvar.textContent = "💾 Salvar no Banco";
+
+        if (error) {
+          aviso.innerText = "❌ Erro ao salvar: " + error.message;
+          aviso.style.color = "#EF4444";
+        } else {
+          aviso.innerText = "✅ Produto cadastrado com sucesso!";
+          aviso.style.color = "#22C55E";
+
+          document.getElementById("input-nome").value = "";
+          document.getElementById("input-preco").value = "";
+          document.getElementById("input-imagem").value = "";
+          document.getElementById("input-categoria").value = "";
+
+          document.getElementById("input-nome").focus();
+          carregarRecentes();
+        }
+      }
+
+      // ============================================
+      // 5. CARREGAR ÚLTIMOS CADASTROS
+      // ============================================
+      async function carregarRecentes() {
+        const secao = document.getElementById("secao-recentes");
+        const lista = document.getElementById("lista-itens-recentes");
+
+        try {
+          inicializarBanco();
+          let { data: produtos, error } = await banco
+            .from("produtos")
+            .select("*")
+            .limit(5);
+
+          if (error || !produtos || produtos.length === 0) {
+            secao.style.display = "none";
+            return;
+          }
+
+          secao.style.display = "block";
+          lista.innerHTML = "";
+
+          produtos.forEach((item) => {
+            let precoFormatado = Number(item.preco).toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            });
+
+            lista.innerHTML += `
+                        <div class="item-recente">
+                            <img src="${
+                              item.imagem_url ||
+                              "https://via.placeholder.com/40x40?text=📦"
+                            }" 
+                                 alt="${item.nome}"
+                                 onerror="this.src='https://via.placeholder.com/40x40?text=📦'">
+                            <div class="item-info">
+                                <div class="item-nome">${item.nome}</div>
+                                <div class="item-preco">${precoFormatado}</div>
+                            </div>
+                        </div>
+                    `;
+          });
+        } catch (err) {
+          // Silencia erros na listagem
+        }
+      }
+
+      // ============================================
+      // 6. EFEITO DE SHAKE (feedback visual de erro)
+      // ============================================
+      function shakeInput() {
+        const container = document.querySelector(".painel-container");
+        container.style.animation = "none";
+        container.offsetHeight;
+        container.style.animation = "shake 0.4s ease";
+      }
+
+      const style = document.createElement("style");
+      style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-8px); }
+                50% { transform: translateX(8px); }
+                75% { transform: translateX(-4px); }
+            }
+        `;
+      document.head.appendChild(style);
+
+      // ============================================
+      // 7. ATALHO DE TECLADO (Enter para salvar)
+      // ============================================
+      document.addEventListener("keydown", function (e) {
+        if (
+          e.key === "Enter" &&
+          !document.getElementById("btn-salvar").disabled
+        ) {
+          cadastrarProduto();
+        }
+      });
+
+      // ============================================
+      // 8. GERENCIAR PRODUTOS — Carregar todos
+      // ============================================
+      let todosOsProdutos = [];
+
+      async function carregarTodosProdutos() {
+        const lista = document.getElementById("lista-todos-produtos");
+        const stats = document.getElementById("gerenciar-stats");
+
+        try {
+          inicializarBanco();
+          let { data: produtos, error } = await banco
+            .from("produtos")
+            .select("*");
+
+          if (error) {
+            lista.innerHTML =
+              '<p class="carregando-msg">❌ Erro ao carregar: ' +
+              error.message +
+              "</p>";
+            return;
+          }
+
+          if (!produtos || produtos.length === 0) {
+            lista.innerHTML =
+              '<p class="carregando-msg">📭 Nenhum produto cadastrado.</p>';
+            stats.innerHTML = "";
+            return;
+          }
+
+          todosOsProdutos = produtos;
+          stats.innerHTML =
+            '<span class="stat-badge">📦 Total: <strong>' +
+            produtos.length +
+            "</strong> produtos</span>";
+          renderizarProdutosAdmin(produtos);
+        } catch (err) {
+          lista.innerHTML =
+            '<p class="carregando-msg">❌ ' + err.message + "</p>";
+        }
+      }
+
+      function renderizarProdutosAdmin(produtos) {
+        const lista = document.getElementById("lista-todos-produtos");
+        lista.innerHTML = "";
+
+        if (produtos.length === 0) {
+          lista.innerHTML =
+            '<p class="carregando-msg">🔍 Nenhum produto encontrado.</p>';
+          return;
+        }
+
+        produtos.forEach((item) => {
+          let precoFormatado = Number(item.preco).toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+          });
+
+          const categoriaCores = {
+            Commum: "#22C55E",
+            Raro: "#3B82F6",
+            "Deus Brainrot": "#EF4444",
+            Secret: "#A855F7",
+            Legendary: "#F59E0B",
+          };
+          const cor = categoriaCores[item.Categoria] || "#6B7280";
+
+          const card = document.createElement("div");
+          card.className = "produto-admin-card";
+          card.innerHTML = `
+                    <div class="produto-admin-img">
+                        <img src="${
+                          item.imagem_url ||
+                          "https://via.placeholder.com/60x60?text=📦"
+                        }" 
+                             alt="${item.nome}"
+                             onerror="this.src='https://via.placeholder.com/60x60?text=📦'">
+                    </div>
+                    <div class="produto-admin-info">
+                        <div class="produto-admin-nome">${item.nome}</div>
+                        <div class="produto-admin-detalhes">
+                            <span class="produto-admin-preco">${precoFormatado}</span>
+                            <span class="produto-admin-cat" style="background: ${cor}20; color: ${cor}; border: 1px solid ${cor}40;">${
+            item.Categoria || "Sem categoria"
+          }</span>
+                        </div>
+                    </div>
+                    <button class="btn-excluir" onclick="excluirProduto('${item.nome.replace(
+                      /'/g,
+                      "\\'"
+                    )}')">
+                        🗑️ Excluir
+                    </button>
+                `;
+          lista.appendChild(card);
+        });
+      }
+
+      // ============================================
+      // 9. EXCLUIR PRODUTO
+      // ============================================
+      async function excluirProduto(nomeProduto) {
+        const confirmacao = confirm(
+          '⚠️ Tem certeza que deseja excluir "' +
+            nomeProduto +
+            '"?\n\nEssa ação não pode ser desfeita!'
+        );
+
+        if (!confirmacao) return;
+
+        try {
+          inicializarBanco();
+
+          let { error } = await banco
+            .from("produtos")
+            .delete()
+            .eq("nome", nomeProduto);
+
+          if (error) {
+            alert("❌ Erro ao excluir: " + error.message);
+          } else {
+            alert('✅ "' + nomeProduto + '" foi excluído com sucesso!');
+            carregarTodosProdutos();
+            carregarRecentes();
+          }
+        } catch (err) {
+          alert("❌ Erro: " + err.message);
+        }
+      }
+
+      // ============================================
+      // 10. FILTRAR PRODUTOS NO ADMIN
+      // ============================================
+      function filtrarProdutosAdmin() {
+        const busca = document
+          .getElementById("busca-admin")
+          .value.toLowerCase()
+          .trim();
+
+        if (busca === "") {
+          renderizarProdutosAdmin(todosOsProdutos);
+          return;
+        }
+
+        const filtrados = todosOsProdutos.filter(
+          (item) =>
+            item.nome.toLowerCase().includes(busca) ||
+            (item.Categoria && item.Categoria.toLowerCase().includes(busca))
+        );
+        renderizarProdutosAdmin(filtrados);
+      }
+
+      // ============================================
+      // 11. ATALHO DE TECLADO (Enter para salvar)
+      // ============================================
+
+      // ============================================
+      // 12. INICIALIZAR — Verifica acesso primeiro
+      // ============================================
+      window.addEventListener("DOMContentLoaded", function () {
+        setTimeout(() => {
+          verificarAcesso();
+          carregarRecentes();
+          carregarTodosProdutos();
+        }, 150);
+      });
+      if (
+        document.readyState === "complete" ||
+        document.readyState === "interactive"
+      ) {
+        setTimeout(() => {
+          verificarAcesso();
+          carregarRecentes();
+          carregarTodosProdutos();
+        }, 250);
+      }
+    </script>
+  </body>
+</html>
