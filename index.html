@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🧠 Roube um Brainrot Shop</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+  <body class="vitrine-body">
+    <!-- BOTÃO DARK MODE - FIXO NA TELA -->
+    <button
+      id="btn-darkmode"
+      onclick="toggleDarkMode()"
+      style="
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      🌙
+    </button>
+
+    <!-- ========== HEADER ========== -->
+    <header class="header-vitrine">
+      <h1><span class="emoji">🧠</span> Roube um Brainrot Shop</h1>
+      <p>Compre agora seu Brainrot na melhor loja do Brasil!</p>
+
+      <div class="barra-busca">
+        <span class="icone-busca">🔍</span>
+        <input
+          type="text"
+          id="campo-busca"
+          placeholder="Buscar produto..."
+          oninput="filtrarProdutos()"
+        />
+      </div>
+
+      <!-- Filtro por Categorias -->
+      <div class="categorias-filtro" id="categorias-filtro">
+        <button
+          class="btn-categoria ativo"
+          onclick="filtrarPorCategoria('Todas')"
+        >
+          🏷️ Todas
+        </button>
+      </div>
+    </header>
+
+    <!-- ========== INFO BAR ========== -->
+    <div class="info-bar">
+      <span id="contagem-produtos">Carregando produtos...</span>
+      <span id="hora-atualizacao"></span>
+    </div>
+
+    <!-- ========== VITRINE ========== -->
+    <div class="vitrine-container" id="vitrine">
+      <div class="loading-state" id="loading">
+        <div class="spinner"></div>
+        <p>Carregando produtos da nuvem...</p>
+      </div>
+    </div>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer-vitrine">
+      <p>© 2025 Roube um Brainrot Shop — Todos os direitos reservados.</p>
+      <p style="margin-top: 8px">
+        <a href="login.html">🔐 Área do Lojista</a>
+      </p>
+    </footer>
+
+    <!-- ========== SCRIPT ========== -->
+    <script>
+      // ============================================
+      // 1. CONFIGURAÇÃO DO SUPABASE
+      // ============================================
+      const supabaseUrl = "https://saexzdhlesaomczxcxlk.supabase.co";
+      const supabaseKey =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhZXh6ZGhsZXNhb21jenhjeGxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NDIyMDIsImV4cCI6MjA5MDAxODIwMn0.XFls2ymzat9Nm2TSjry6qZzkQbIceLvEBMocA18cvcg";
+
+      // Inicialização segura — aguarda a biblioteca carregar
+      let banco;
+      function inicializarBanco() {
+        if (banco) return banco;
+        if (
+          typeof window.supabase === "undefined" ||
+          !window.supabase.createClient
+        ) {
+          throw new Error(
+            "Biblioteca Supabase ainda não carregou. Recarregue a página."
+          );
+        }
+        banco = window.supabase.createClient(supabaseUrl, supabaseKey);
+        return banco;
+      }
+
+      // Variável global para armazenar os produtos (para busca)
+      let todosProdutos = [];
+      let categoriaAtiva = "Todas";
+
+      // ============================================
+      // 2. CARREGAR PRODUTOS DA NUVEM
+      // ============================================
+      async function carregarProdutos() {
+        const vitrine = document.getElementById("vitrine");
+        const loading = document.getElementById("loading");
+        const contagem = document.getElementById("contagem-produtos");
+        const horaAtual = document.getElementById("hora-atualizacao");
+
+        try {
+          inicializarBanco();
+          let { data: produtos, error } = await banco
+            .from("produtos")
+            .select("*");
+
+          // Remove loading
+          if (loading) loading.remove();
+
+          if (error) {
+            vitrine.innerHTML = `
+                        <div class="empty-state">
+                            <div class="emoji-grande">⚠️</div>
+                            <p>Erro ao carregar produtos: ${error.message}</p>
+                        </div>
+                    `;
+            contagem.textContent = "Erro ao conectar";
+            return;
+          }
+
+          if (!produtos || produtos.length === 0) {
+            vitrine.innerHTML = `
+                        <div class="empty-state">
+                            <div class="emoji-grande">📦</div>
+                            <p>Nenhum produto cadastrado ainda.<br>Use o <a href="admin.html" style="color: var(--cor-primaria); font-weight:600;">Painel Admin</a> para adicionar!</p>
+                        </div>
+                    `;
+            contagem.textContent = "0 produtos encontrados";
+            return;
+          }
+
+          // Armazena globalmente para busca
+          todosProdutos = produtos;
+
+          // Gera os botões de categorias dinamicamente
+          gerarCategorias(produtos);
+
+          // Atualiza contagem
+          contagem.textContent = `${produtos.length} produto${
+            produtos.length !== 1 ? "s" : ""
+          } encontrado${produtos.length !== 1 ? "s" : ""}`;
+
+          // Hora da última atualização
+          const agora = new Date();
+          horaAtual.textContent = `Atualizado às ${agora.toLocaleTimeString(
+            "pt-BR",
+            { hour: "2-digit", minute: "2-digit" }
+          )}`;
+
+          // Renderiza os cards
+          renderizarCards(produtos);
+        } catch (err) {
+          if (loading) loading.remove();
+          vitrine.innerHTML = `
+                    <div class="empty-state">
+                        <div class="emoji-grande">🔌</div>
+                        <p>❌ Erro de conexão: ${err.message}</p>
+                        <p style="margin-top:10px;font-size:0.85rem;color:#888;">Recarregue a página ou verifique sua configuração do Supabase.</p>
+                    </div>
+                `;
+          contagem.textContent = "Erro de conexão";
+        }
+      }
+
+      // ============================================
+      // 3. RENDERIZAR CARDS NA VITRINE
+      // ============================================
+      function renderizarCards(produtos) {
+        const vitrine = document.getElementById("vitrine");
+        vitrine.innerHTML = "";
+
+        produtos.forEach((item, index) => {
+          // Cria a máscara de moeda Brasileira
+          let precoFormatado = Number(item.preco).toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+          });
+
+          let div = document.createElement("div");
+          div.className = "card-produto";
+          div.style.animationDelay = `${index * 0.05}s`;
+
+          // Badge de categoria
+          let categoriaHTML = item.Categoria
+            ? `<span class="badge-categoria">${item.Categoria}</span>`
+            : "";
+
+          div.innerHTML = `
+                    <div class="img-wrapper">
+                        <img src="${
+                          item.imagem_url ||
+                          "https://via.placeholder.com/200x200?text=Sem+Foto"
+                        }" 
+                             alt="${item.nome}"
+                             onerror="this.src='https://via.placeholder.com/200x200?text=Sem+Foto'">
+                    </div>
+                    <div class="card-info">
+                        <h3>${item.nome}</h3>
+                        ${categoriaHTML}
+                        <p class="preco-destaque">${precoFormatado}</p>
+                    </div>
+                `;
+          vitrine.appendChild(div);
+        });
+      }
+
+      // ============================================
+      // 4. GERAR BOTÕES DE CATEGORIAS (FIXAS)
+      // ============================================
+      function gerarCategorias(produtos) {
+        const container = document.getElementById("categorias-filtro");
+
+        // Categorias fixas com emojis e cores
+        const categoriasFixas = [
+          { nome: "Todas", emoji: "🏷️", cor: "#7c3aed" },
+          { nome: "Commum", emoji: "🟢", cor: "#22c55e" },
+          { nome: "Raro", emoji: "🔵", cor: "#3b82f6" },
+          { nome: "Deus Brainrot", emoji: "🧠", cor: "#ef4444" },
+          { nome: "Secret", emoji: "🔮", cor: "#a855f7" },
+          { nome: "Legendary", emoji: "🏆", cor: "#f59e0b" },
+        ];
+
+        // Conta quantos produtos existem em cada categoria
+        const contagens = {};
+        produtos.forEach((p) => {
+          if (p.Categoria && p.Categoria.trim() !== "") {
+            const cat = p.Categoria.trim();
+            contagens[cat] = (contagens[cat] || 0) + 1;
+          }
+        });
+
+        // Limpa e recria os botões
+        container.innerHTML = "";
+
+        categoriasFixas.forEach((cat) => {
+          const btn = document.createElement("button");
+          btn.className =
+            "btn-categoria" + (cat.nome === "Todas" ? " ativo" : "");
+
+          const qtd =
+            cat.nome === "Todas" ? produtos.length : contagens[cat.nome] || 0;
+          btn.innerHTML = `${cat.emoji} ${cat.nome} <span class="cat-count">${qtd}</span>`;
+          btn.style.setProperty("--cat-cor", cat.cor);
+          btn.onclick = () => filtrarPorCategoria(cat.nome);
+          container.appendChild(btn);
+        });
+      }
+
+      // ============================================
+      // 5. FILTRAR POR CATEGORIA
+      // ============================================
+      function filtrarPorCategoria(categoria) {
+        categoriaAtiva = categoria;
+        const contagem = document.getElementById("contagem-produtos");
+
+        // Atualiza visual dos botões
+        document.querySelectorAll(".btn-categoria").forEach((btn) => {
+          btn.classList.remove("ativo");
+          if (
+            btn.textContent.includes(
+              categoria === "Todas" ? "Todas" : categoria
+            )
+          ) {
+            btn.classList.add("ativo");
+          }
+        });
+
+        // Limpa campo de busca
+        document.getElementById("campo-busca").value = "";
+
+        // Filtra produtos
+        let filtrados;
+        if (categoria === "Todas") {
+          filtrados = todosProdutos;
+        } else {
+          filtrados = todosProdutos.filter(
+            (p) => p.Categoria && p.Categoria.trim() === categoria
+          );
+        }
+
+        if (filtrados.length === 0) {
+          document.getElementById("vitrine").innerHTML = `
+                    <div class="empty-state">
+                        <div class="emoji-grande">📭</div>
+                        <p>Nenhum produto na categoria "<strong>${categoria}</strong>"</p>
+                    </div>
+                `;
+        } else {
+          renderizarCards(filtrados);
+        }
+
+        contagem.textContent = `${filtrados.length} produto${
+          filtrados.length !== 1 ? "s" : ""
+        } encontrado${filtrados.length !== 1 ? "s" : ""}`;
+      }
+
+      // ============================================
+      // 6. FILTRO DE BUSCA (por texto + categoria ativa)
+      // ============================================
+      function filtrarProdutos() {
+        const termo = document
+          .getElementById("campo-busca")
+          .value.toLowerCase()
+          .trim();
+        const contagem = document.getElementById("contagem-produtos");
+
+        // Base: aplica filtro de categoria primeiro
+        let base = todosProdutos;
+        if (categoriaAtiva !== "Todas") {
+          base = todosProdutos.filter(
+            (p) => p.Categoria && p.Categoria.trim() === categoriaAtiva
+          );
+        }
+
+        if (termo === "") {
+          renderizarCards(base);
+          contagem.textContent = `${base.length} produto${
+            base.length !== 1 ? "s" : ""
+          } encontrado${base.length !== 1 ? "s" : ""}`;
+          return;
+        }
+
+        const filtrados = base.filter((p) =>
+          p.nome.toLowerCase().includes(termo)
+        );
+
+        if (filtrados.length === 0) {
+          document.getElementById("vitrine").innerHTML = `
+                    <div class="empty-state">
+                        <div class="emoji-grande">🔍</div>
+                        <p>Nenhum produto encontrado para "<strong>${termo}</strong>"</p>
+                    </div>
+                `;
+        } else {
+          renderizarCards(filtrados);
+        }
+
+        contagem.textContent = `${filtrados.length} produto${
+          filtrados.length !== 1 ? "s" : ""
+        } encontrado${filtrados.length !== 1 ? "s" : ""}`;
+      }
+
+      // ============================================
+      // 7. INICIALIZAR — Aguarda tudo carregar
+      // ============================================
+      window.addEventListener("DOMContentLoaded", function () {
+        // Pequeno delay para garantir que o CDN do Supabase carregou
+        setTimeout(carregarProdutos, 100);
+      });
+      // Fallback caso DOMContentLoaded já tenha disparado
+      if (
+        document.readyState === "complete" ||
+        document.readyState === "interactive"
+      ) {
+        setTimeout(carregarProdutos, 200);
+      }
+
+      // ============================================
+      // 8. DARK MODE
+      // ============================================
+      function toggleDarkMode() {
+        document.body.classList.toggle("dark-mode");
+        const btn = document.getElementById("btn-darkmode");
+        const isDark = document.body.classList.contains("dark-mode");
+        btn.textContent = isDark ? "☀️" : "🌙";
+        localStorage.setItem("darkMode", isDark ? "on" : "off");
+      }
+
+      // Carregar preferência salva
+      if (localStorage.getItem("darkMode") === "on") {
+        document.body.classList.add("dark-mode");
+        document.getElementById("btn-darkmode").textContent = "☀️";
+      }
+    </script>
+
+    <!-- CSS DARK MODE -->
+    <style>
+      body.dark-mode {
+        background-color: #0a0a0f !important;
+        color: #e2e8f0 !important;
+      }
+      body.dark-mode .card-produto {
+        background: #1a1a2e !important;
+        border-color: rgba(139, 92, 246, 0.2) !important;
+        color: #e2e8f0 !important;
+      }
+      body.dark-mode .card-produto h3 {
+        color: #ffffff !important;
+      }
+      body.dark-mode .card-produto .preco-destaque {
+        color: #a78bfa !important;
+      }
+      body.dark-mode .info-bar {
+        background: #111127 !important;
+        color: #94a3b8 !important;
+        border-color: rgba(139, 92, 246, 0.15) !important;
+      }
+      body.dark-mode .info-bar span {
+        color: #94a3b8 !important;
+      }
+      body.dark-mode footer {
+        background: #0f0f1a !important;
+        color: #64748b !important;
+      }
+      body.dark-mode footer a {
+        color: #a78bfa !important;
+      }
+      body.dark-mode .empty-state {
+        color: #94a3b8 !important;
+      }
+      body.dark-mode .badge-categoria {
+        background: rgba(139, 92, 246, 0.2) !important;
+        color: #a78bfa !important;
+      }
+      body.dark-mode .badge-novo {
+        background: rgba(16, 185, 129, 0.2) !important;
+        color: #34d399 !important;
+      }
+    </style>
+  </body>
+</html>
