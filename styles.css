@@ -1,0 +1,1124 @@
+/* ============================================
+   CATÁLOGO EM NUVEM - Identidade Visual
+   Google Fonts: Poppins + Inter
+   ============================================ */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap");
+
+/* ---------- RESET & VARIÁVEIS ---------- */
+:root {
+  --cor-primaria: #6c3df5;
+  --cor-primaria-hover: #5529d6;
+  --cor-secundaria: #1a1a2e;
+  --cor-fundo: #f0f2f5;
+  --cor-card: #ffffff;
+  --cor-texto: #2d2d2d;
+  --cor-texto-suave: #6b7280;
+  --cor-preco: #16a34a;
+  --cor-destaque: #f59e0b;
+  --cor-erro: #ef4444;
+  --cor-sucesso: #22c55e;
+  --cor-info: #3b82f6;
+  --sombra-card: 0 4px 15px rgba(0, 0, 0, 0.08);
+  --sombra-card-hover: 0 12px 35px rgba(108, 61, 245, 0.18);
+  --sombra-painel: 0 20px 60px rgba(0, 0, 0, 0.15);
+  --radius: 16px;
+  --transicao: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  color: var(--cor-texto);
+  line-height: 1.6;
+}
+
+/* ============================================
+      VITRINE (index.html)
+      ============================================ */
+
+/* ---------- Header / Banner ---------- */
+.vitrine-body {
+  background: var(--cor-fundo);
+  min-height: 100vh;
+}
+
+.header-vitrine {
+  background: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTIH48Jzy6FBHzKFHMTkACoyINN1mITF_wmw&s")
+    center center / cover no-repeat;
+  color: #fff;
+  padding: 50px 20px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.header-vitrine::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.header-vitrine h1 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 800;
+  font-size: 2.8rem;
+  position: relative;
+  z-index: 1;
+  letter-spacing: -0.5px;
+}
+
+.header-vitrine h1 .emoji {
+  font-size: 2.4rem;
+}
+
+.header-vitrine p {
+  font-weight: 300;
+  font-size: 1.1rem;
+  margin-top: 8px;
+  opacity: 0.85;
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- Barra de busca ---------- */
+.barra-busca {
+  max-width: 500px;
+  margin: 25px auto 0;
+  position: relative;
+  z-index: 1;
+}
+
+.barra-busca input {
+  width: 100%;
+  padding: 14px 20px 14px 48px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-family: "Inter", sans-serif;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  backdrop-filter: blur(10px);
+  transition: var(--transicao);
+}
+
+.barra-busca input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.barra-busca input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 0 3px rgba(108, 61, 245, 0.4);
+}
+
+.barra-busca .icone-busca {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  opacity: 0.7;
+}
+
+/* ---------- Filtro de Categorias ---------- */
+.categorias-filtro {
+  max-width: 800px;
+  margin: 20px auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  padding: 0 10px;
+}
+
+.btn-categoria {
+  padding: 8px 18px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transicao);
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-categoria .cat-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 20px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.btn-categoria:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.45);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.btn-categoria.ativo {
+  background: var(--cat-cor, var(--cor-primaria));
+  border-color: var(--cat-cor, var(--cor-primaria));
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+.btn-categoria.ativo .cat-count {
+  background: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.btn-categoria.ativo:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+  .categorias-filtro {
+    gap: 8px;
+  }
+  .btn-categoria {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+  }
+}
+
+/* ---------- Contagem de produtos ---------- */
+.info-bar {
+  max-width: 1200px;
+  margin: 20px auto 0;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.info-bar span {
+  font-size: 0.9rem;
+  color: var(--cor-texto-suave);
+  font-weight: 500;
+}
+
+/* ---------- Grid da Vitrine ---------- */
+.vitrine-container {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 20px 60px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 28px;
+}
+
+/* ---------- Cards ---------- */
+.card-produto {
+  background: var(--cor-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--sombra-card);
+  transition: var(--transicao);
+  cursor: pointer;
+  position: relative;
+}
+
+.card-produto:hover {
+  transform: scale(1.045) translateY(-6px);
+  box-shadow: var(--sombra-card-hover);
+}
+
+.card-produto .img-wrapper {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f8f9fb, #eef0f4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-produto .img-wrapper img {
+  max-width: 80%;
+  max-height: 170px;
+  object-fit: contain;
+  transition: transform 0.4s ease;
+}
+
+.card-produto:hover .img-wrapper img {
+  transform: scale(1.08);
+}
+
+.card-produto .card-info {
+  padding: 18px 20px 22px;
+}
+
+.card-produto .card-info h3 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--cor-texto);
+  margin-bottom: 8px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.preco-destaque {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: var(--cor-preco);
+  letter-spacing: -0.3px;
+}
+
+.card-produto .badge-novo {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: var(--cor-destaque);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-categoria {
+  display: inline-block;
+  background: rgba(108, 61, 245, 0.1);
+  color: var(--cor-primaria);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+
+/* ---------- Loading & Empty State ---------- */
+.loading-state,
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--cor-texto-suave);
+}
+
+.loading-state .spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e5e7eb;
+  border-top-color: var(--cor-primaria);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 18px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.empty-state .emoji-grande {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+/* ---------- Footer ---------- */
+.footer-vitrine {
+  background: var(--cor-secundaria);
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  padding: 28px 20px;
+  font-size: 0.85rem;
+}
+
+.footer-vitrine a {
+  color: var(--cor-destaque);
+  text-decoration: none;
+  font-weight: 600;
+  transition: var(--transicao);
+}
+
+.footer-vitrine a:hover {
+  color: #fbbf24;
+  text-decoration: underline;
+}
+
+/* ============================================
+      PAINEL ADMIN (admin.html)
+      ============================================ */
+.admin-body {
+  background: url("https://pt.quizur.com/_image?href=https://dev-beta.quizur.com/storage/v1/object/public//imagens//21146491/5e42a7c0-6f21-4eb1-bd45-bff968346d9c.png&w=1024&h=1024&f=webp")
+    center center / cover no-repeat fixed;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 30px 20px;
+  position: relative;
+}
+
+.admin-layout {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  max-width: 1100px;
+  position: relative;
+  z-index: 1;
+  flex-wrap: wrap;
+  padding-top: 20px;
+}
+
+.admin-body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.painel-container {
+  background: var(--cor-card);
+  border-radius: 24px;
+  padding: 45px 40px;
+  width: 100%;
+  max-width: 500px;
+  flex: 1;
+  min-width: 380px;
+  box-shadow: var(--sombra-painel);
+  position: relative;
+  z-index: 1;
+  animation: fadeSlideUp 0.6s ease-out;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.painel-container .painel-icone {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, var(--cor-primaria), #8b5cf6);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  margin: 0 auto 18px;
+  box-shadow: 0 8px 25px rgba(108, 61, 245, 0.3);
+}
+
+.painel-container h2 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 1.6rem;
+  text-align: center;
+  color: var(--cor-secundaria);
+  margin-bottom: 6px;
+}
+
+.painel-container .subtitulo {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--cor-texto-suave);
+  margin-bottom: 30px;
+}
+
+.form-grupo {
+  margin-bottom: 20px;
+}
+
+.form-grupo label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--cor-texto);
+  margin-bottom: 7px;
+  letter-spacing: 0.2px;
+}
+
+.form-grupo input,
+.form-grupo textarea,
+.form-grupo select {
+  width: 100%;
+  padding: 13px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-family: "Inter", sans-serif;
+  color: var(--cor-texto);
+  transition: var(--transicao);
+  background: #fafbfc;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.form-grupo select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236B7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+}
+
+.form-grupo input:focus,
+.form-grupo textarea:focus,
+.form-grupo select:focus {
+  outline: none;
+  border-color: var(--cor-primaria);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(108, 61, 245, 0.1);
+}
+
+.form-grupo input::placeholder {
+  color: #b0b7c3;
+}
+
+.btn-salvar {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, var(--cor-primaria), #8b5cf6);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: var(--transicao);
+  letter-spacing: 0.3px;
+  margin-top: 8px;
+  box-shadow: 0 6px 20px rgba(108, 61, 245, 0.3);
+}
+
+.btn-salvar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(108, 61, 245, 0.4);
+}
+
+.btn-salvar:active {
+  transform: translateY(0);
+}
+
+.btn-salvar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+#mensagem-aviso {
+  text-align: center;
+  margin-top: 18px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-height: 22px;
+  transition: var(--transicao);
+}
+
+.link-voltar {
+  display: block;
+  text-align: center;
+  margin-top: 22px;
+  color: var(--cor-texto-suave);
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: var(--transicao);
+}
+
+.link-voltar:hover {
+  color: var(--cor-primaria);
+}
+
+/* ---------- Lista de produtos recentes no admin ---------- */
+.lista-recentes {
+  margin-top: 30px;
+  border-top: 2px solid #f0f2f5;
+  padding-top: 22px;
+}
+
+.lista-recentes h3 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 14px;
+  color: var(--cor-texto);
+}
+
+.item-recente {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: #f8f9fb;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: var(--transicao);
+}
+
+.item-recente:hover {
+  background: #eef0f4;
+}
+
+.item-recente img {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #e5e7eb;
+}
+
+.item-recente .item-info {
+  flex: 1;
+}
+
+.item-recente .item-info .item-nome {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.item-recente .item-info .item-preco {
+  font-size: 0.8rem;
+  color: var(--cor-preco);
+  font-weight: 600;
+}
+
+/* ============================================
+      LOGIN (login.html)
+      ============================================ */
+.login-body {
+  background: linear-gradient(
+    135deg,
+    #0f0f1a 0%,
+    #1a1a2e 30%,
+    #16213e 60%,
+    #0f3460 100%
+  );
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  position: relative;
+}
+
+.login-body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      circle at 30% 80%,
+      rgba(108, 61, 245, 0.25) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 70% 20%,
+      rgba(239, 68, 68, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(245, 158, 11, 0.08) 0%,
+      transparent 60%
+    );
+  pointer-events: none;
+}
+
+.login-container {
+  background: var(--cor-card);
+  border-radius: 24px;
+  padding: 45px 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1;
+  animation: fadeSlideUp 0.6s ease-out;
+}
+
+.login-icone {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin: 0 auto 18px;
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+}
+
+.login-container h2 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 1.6rem;
+  text-align: center;
+  color: var(--cor-secundaria);
+  margin-bottom: 6px;
+}
+
+.login-subtitulo {
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--cor-texto-suave);
+  margin-bottom: 28px;
+}
+
+/* ---------- Campo de Senha com Botão Olho ---------- */
+.senha-grupo {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.senha-grupo input {
+  width: 100%;
+  padding-right: 52px !important;
+}
+
+.btn-olho {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  transition: var(--transicao);
+}
+
+.btn-olho:hover {
+  background: rgba(108, 61, 245, 0.08);
+}
+
+/* ---------- Botão Entrar ---------- */
+.btn-entrar {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: var(--transicao);
+  letter-spacing: 0.3px;
+  margin-top: 8px;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+}
+
+.btn-entrar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+}
+
+.btn-entrar:active {
+  transform: translateY(0);
+}
+
+.btn-entrar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.login-container #mensagem {
+  text-align: center;
+  margin-top: 18px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-height: 22px;
+  transition: var(--transicao);
+}
+
+/* ============================================
+      USUÁRIO LOGADO (admin.html)
+      ============================================ */
+.usuario-logado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border: 2px solid #bbf7d0;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin: 16px 0 20px;
+  gap: 12px;
+}
+
+.usuario-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.usuario-avatar {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.usuario-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #16a34a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.usuario-email {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cor-texto);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-sair {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: var(--transicao);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-sair:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+}
+
+.btn-sair:active {
+  transform: translateY(0);
+}
+
+.admin-nav {
+  margin-top: 22px;
+  text-align: center;
+}
+
+/* ============================================
+      GERENCIAR PRODUTOS (ADMIN - EXCLUIR)
+      ============================================ */
+.gerenciar-container {
+  margin-top: 30px;
+  border-top: 3px solid #ef4444;
+}
+
+.gerenciar-filtro {
+  margin-bottom: 16px;
+}
+
+.gerenciar-filtro input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #1e293b;
+  font-family: "Inter", sans-serif;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.gerenciar-filtro input:focus {
+  outline: none;
+  border-color: #ef4444;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
+}
+
+.gerenciar-filtro input::placeholder {
+  color: #94a3b8;
+}
+
+.gerenciar-stats {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.stat-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border-radius: 20px;
+  font-family: "Inter", sans-serif;
+  font-size: 0.85rem;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.lista-todos-produtos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.lista-todos-produtos::-webkit-scrollbar {
+  width: 6px;
+}
+
+.lista-todos-produtos::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.lista-todos-produtos::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.carregando-msg {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: "Inter", sans-serif;
+  padding: 30px;
+}
+
+.produto-admin-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  transition: all 0.3s ease;
+}
+
+.produto-admin-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
+}
+
+.produto-admin-img {
+  flex-shrink: 0;
+  width: 55px;
+  height: 55px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.produto-admin-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.produto-admin-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.produto-admin-nome {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.produto-admin-detalhes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.produto-admin-preco {
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #22c55e;
+}
+
+.produto-admin-cat {
+  font-family: "Inter", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-excluir {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  font-family: "Inter", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-excluir:hover {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+.btn-excluir:active {
+  transform: scale(0.95);
+}
+
+/* ============================================
+      RESPONSIVIDADE
+      ============================================ */
+@media (max-width: 768px) {
+  .header-vitrine h1 {
+    font-size: 1.8rem;
+  }
+
+  .vitrine-container {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+
+  .card-produto .img-wrapper {
+    height: 150px;
+  }
+
+  .card-produto .card-info {
+    padding: 14px 14px 18px;
+  }
+
+  .card-produto .card-info h3 {
+    font-size: 0.9rem;
+  }
+
+  .preco-destaque {
+    font-size: 1.1rem;
+  }
+
+  .painel-container {
+    padding: 30px 24px;
+    min-width: unset;
+  }
+
+  .admin-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .vitrine-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .login-container {
+    padding: 30px 22px;
+  }
+
+  .usuario-logado {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .usuario-info {
+    justify-content: center;
+  }
+
+  .produto-admin-card {
+    flex-wrap: wrap;
+  }
+
+  .produto-admin-info {
+    flex: 1 1 calc(100% - 70px);
+  }
+
+  .btn-excluir {
+    width: 100%;
+    text-align: center;
+    margin-top: 4px;
+  }
+}
