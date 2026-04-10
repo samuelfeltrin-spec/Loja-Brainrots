@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🔐 Login - Roube um Brainrot Shop</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+  <body class="login-body">
+    <div class="login-container">
+      <!-- Ícone decorativo -->
+      <div class="login-icone">🔐</div>
+
+      <h2>Acesso Restrito</h2>
+      <p class="login-subtitulo">Entre com suas credenciais de administrador</p>
+
+      <div class="form-grupo">
+        <label>📧 E-mail:</label>
+        <input
+          type="email"
+          id="email"
+          placeholder="seu@email.com"
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="form-grupo">
+        <label>🔑 Senha:</label>
+        <div class="senha-grupo">
+          <input
+            type="password"
+            id="password"
+            placeholder="Sua senha secreta"
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            onclick="mostrarSenha()"
+            id="btn-olho"
+            class="btn-olho"
+            title="Mostrar/Ocultar senha"
+          >
+            👁️
+          </button>
+        </div>
+      </div>
+
+      <button onclick="fazerLogin()" id="btn-entrar" class="btn-entrar">
+        🚀 Entrar no Painel
+      </button>
+
+      <p id="mensagem"></p>
+
+      <!-- Link de volta para a loja -->
+      <a href="index.html" class="link-voltar">← Voltar para a Loja</a>
+    </div>
+
+    <script>
+      // ============================================
+      // 1. CONFIGURAÇÃO DO BANCO (Supabase)
+      // ============================================
+      const supabaseUrl = "https://saexzdhlesaomczxcxlk.supabase.co";
+      const supabaseKey =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhZXh6ZGhsZXNhb21jenhjeGxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NDIyMDIsImV4cCI6MjA5MDAxODIwMn0.XFls2ymzat9Nm2TSjry6qZzkQbIceLvEBMocA18cvcg";
+
+      let banco;
+      function inicializarBanco() {
+        if (banco) return banco;
+        if (
+          typeof window.supabase === "undefined" ||
+          !window.supabase.createClient
+        ) {
+          throw new Error(
+            "Biblioteca Supabase ainda não carregou. Recarregue a página."
+          );
+        }
+        banco = window.supabase.createClient(supabaseUrl, supabaseKey);
+        return banco;
+      }
+
+      // ============================================
+      // 2. MOSTRAR / OCULTAR SENHA
+      // ============================================
+      function mostrarSenha() {
+        let inputSenha = document.getElementById("password");
+        let btnOlho = document.getElementById("btn-olho");
+
+        if (inputSenha.type === "password") {
+          inputSenha.type = "text";
+          btnOlho.innerText = "🙈";
+        } else {
+          inputSenha.type = "password";
+          btnOlho.innerText = "👁️";
+        }
+      }
+
+      // ============================================
+      // 3. FAZER LOGIN
+      // ============================================
+      async function fazerLogin() {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const msg = document.getElementById("mensagem");
+        const btn = document.getElementById("btn-entrar");
+
+        // Validação básica
+        if (email === "" || password === "") {
+          msg.innerText = "⚠️ Preencha e-mail e senha!";
+          msg.style.color = "#EF4444";
+          shakeForm();
+          return;
+        }
+
+        // Efeito de carregamento
+        btn.innerText = "⏳ Verificando...";
+        btn.disabled = true;
+        msg.innerText = "";
+
+        try {
+          inicializarBanco();
+
+          const { data, error } = await banco.auth.signInWithPassword({
+            email: email,
+            password: password,
+          });
+
+          if (error) {
+            msg.innerText = "🚫 Acesso Negado: " + error.message;
+            msg.style.color = "#EF4444";
+            btn.innerText = "🚀 Entrar no Painel";
+            btn.disabled = false;
+            shakeForm();
+          } else {
+            msg.innerText = "✅ Acesso concedido! Carregando painel...";
+            msg.style.color = "#22C55E";
+            btn.innerText = "✅ Logado!";
+
+            // Redireciona para o admin após 1 segundo
+            setTimeout(() => {
+              window.location.href = "admin.html";
+            }, 1000);
+          }
+        } catch (err) {
+          msg.innerText = "❌ Erro: " + err.message;
+          msg.style.color = "#EF4444";
+          btn.innerText = "🚀 Entrar no Painel";
+          btn.disabled = false;
+        }
+      }
+
+      // ============================================
+      // 4. EFEITO SHAKE (feedback visual de erro)
+      // ============================================
+      function shakeForm() {
+        const container = document.querySelector(".login-container");
+        container.style.animation = "none";
+        container.offsetHeight;
+        container.style.animation = "shake 0.4s ease";
+      }
+
+      const style = document.createElement("style");
+      style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-8px); }
+                50% { transform: translateX(8px); }
+                75% { transform: translateX(-4px); }
+            }
+        `;
+      document.head.appendChild(style);
+
+      // ============================================
+      // 5. DESAFIO 1: ATALHO ENTER PARA LOGAR
+      // ============================================
+      document.addEventListener("keydown", function (e) {
+        if (
+          e.key === "Enter" &&
+          !document.getElementById("btn-entrar").disabled
+        ) {
+          fazerLogin();
+        }
+      });
+
+      // ============================================
+      // 6. DESAFIO 2: BLOQUEIO REVERSO
+      //    Se já está logado, redireciona para admin
+      // ============================================
+      async function verificarSeJaLogado() {
+        try {
+          inicializarBanco();
+          const {
+            data: { user },
+          } = await banco.auth.getUser();
+
+          if (user) {
+            // Já está logado! Redireciona direto
+            document.getElementById("mensagem").innerText =
+              "🔄 Você já está logado! Redirecionando...";
+            document.getElementById("mensagem").style.color = "#3B82F6";
+            setTimeout(() => {
+              window.location.href = "admin.html";
+            }, 800);
+          }
+        } catch (err) {
+          // Não logado, fica na tela de login normalmente
+        }
+      }
+
+      // ============================================
+      // 7. INICIALIZAR
+      // ============================================
+      window.addEventListener("DOMContentLoaded", function () {
+        setTimeout(verificarSeJaLogado, 150);
+      });
+      if (
+        document.readyState === "complete" ||
+        document.readyState === "interactive"
+      ) {
+        setTimeout(verificarSeJaLogado, 250);
+      }
+    </script>
+  </body>
+</html>
